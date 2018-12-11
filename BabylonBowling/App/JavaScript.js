@@ -3,7 +3,7 @@ function Character(mesh) {
     this.parts = mesh;
     this.head = mesh[0];
     this.neck = mesh[1];
-    this.body = mesh[2];
+    this.body = mesh[2]; 
     this.rt_forearm = mesh[8];
     this.lt_forearm = mesh[5];
     this.rt_arm = mesh[14];
@@ -19,10 +19,7 @@ function Character(mesh) {
 
     this.enablePhysics = false;
      
-    this.parts.forEach(e => { 
-        //Do somethings
-    }); 
-
+ 
     
 
     this.lt_arm.addChild(this.lt_forearm);
@@ -44,7 +41,12 @@ function Character(mesh) {
 
 }
 function setPhysicsToCharacter(character) {
-
+    /*
+     * We remove at all parts of character their children because
+     * otherwise the physics is the aggregation to the parent
+     * es: if I put the physic on the hand and on the forearm,
+     * the engine put the sum of two physics only on the forearm
+     */ 
     character.lt_arm.removeChild(character.lt_forearm);
     character.lt_forearm.removeChild(character.lt_hand);
     character.rt_arm.removeChild(character.rt_forearm);
@@ -59,30 +61,38 @@ function setPhysicsToCharacter(character) {
     character.body.removeChild(character.rt_arm);
     character.body.removeChild(character.lt_upperleg);
     character.body.removeChild(character.rt_upperleg);
-
-
-    character.rt_hand.physicsImpostor = new BABYLON.PhysicsImpostor(character.rt_hand, BABYLON.PhysicsImpostor.MeshImpostor, { mass: 5, restitution: 0 });
-    character.lt_hand.physicsImpostor = new BABYLON.PhysicsImpostor(character.lt_hand, BABYLON.PhysicsImpostor.MeshImpostor, { mass: 5, restitution: 0 });
-
-    character.rt_forearm.physicsImpostor = new BABYLON.PhysicsImpostor(character.rt_forearm, BABYLON.PhysicsImpostor.MeshImpostor, { mass: 5, restitution: 0 });
-    character.lt_forearm.physicsImpostor = new BABYLON.PhysicsImpostor(character.lt_forearm, BABYLON.PhysicsImpostor.MeshImpostor, { mass: 5, restitution: 0 });
-
-    character.rt_arm.physicsImpostor = new BABYLON.PhysicsImpostor(character.rt_arm, BABYLON.PhysicsImpostor.MeshImpostor, { mass: 5, restitution: 0 });
-    character.lt_arm.physicsImpostor = new BABYLON.PhysicsImpostor(character.lt_arm, BABYLON.PhysicsImpostor.MeshImpostor, { mass: 5, restitution: 0 });
+     
+    /* Inseriamo l'impostore per ogni parte del corpo, con il suo peso, restitution( la forza elastica che esercita su un corpo che collide con esso),
+     * potremmo aggiungere anche la friction: ovvero l'attrito.
+     */
    
-    character.rt_foot.physicsImpostor = new BABYLON.PhysicsImpostor(character.rt_foot, BABYLON.PhysicsImpostor.MeshImpostor, { mass: 5, restitution: 0 });
-    character.lt_foot.physicsImpostor = new BABYLON.PhysicsImpostor(character.lt_foot, BABYLON.PhysicsImpostor.MeshImpostor, { mass: 5, restitution: 0 });
+    character.rt_hand.physicsImpostor = new BABYLON.PhysicsImpostor(character.rt_hand, BABYLON.PhysicsImpostor.CylinderImpostor, { mass: 5, restitution: 1 });
+    character.lt_hand.physicsImpostor = new BABYLON.PhysicsImpostor(character.lt_hand, BABYLON.PhysicsImpostor.CylinderImpostor, { mass: 5, restitution: 1 });
 
-    character.rt_downleg.physicsImpostor = new BABYLON.PhysicsImpostor(character.rt_downleg, BABYLON.PhysicsImpostor.MeshImpostor, { mass: 5, restitution: 0 });
-    character.lt_downleg.physicsImpostor = new BABYLON.PhysicsImpostor(character.lt_downleg, BABYLON.PhysicsImpostor.MeshImpostor, { mass: 5, restitution: 0 });
+    character.rt_forearm.physicsImpostor = new BABYLON.PhysicsImpostor(character.rt_forearm, BABYLON.PhysicsImpostor.CylinderImpostor, { mass: 5, restitution: 1 });
+    character.lt_forearm.physicsImpostor = new BABYLON.PhysicsImpostor(character.lt_forearm, BABYLON.PhysicsImpostor.CylinderImpostor, { mass: 5, restitution: 1 });
 
-    character.rt_upperleg.physicsImpostor = new BABYLON.PhysicsImpostor(character.rt_upperleg, BABYLON.PhysicsImpostor.MeshImpostor, { mass: 5, restitution: 0 });
-    character.lt_upperleg.physicsImpostor = new BABYLON.PhysicsImpostor(character.lt_upperleg, BABYLON.PhysicsImpostor.MeshImpostor, { mass: 5, restitution: 0 });
+    character.rt_arm.physicsImpostor = new BABYLON.PhysicsImpostor(character.rt_arm, BABYLON.PhysicsImpostor.CylinderImpostor, { mass: 5, restitution: 1 });
+    character.lt_arm.physicsImpostor = new BABYLON.PhysicsImpostor(character.lt_arm, BABYLON.PhysicsImpostor.CylinderImpostor, { mass: 5, restitution: 1 });
+   
+    character.rt_foot.physicsImpostor = new BABYLON.PhysicsImpostor(character.rt_foot, BABYLON.PhysicsImpostor.CylinderImpostor, { mass: 5, restitution: 1 });
+    character.lt_foot.physicsImpostor = new BABYLON.PhysicsImpostor(character.lt_foot, BABYLON.PhysicsImpostor.CylinderImpostor, { mass: 5, restitution: 1 });
 
-    character.head.physicsImpostor = new BABYLON.PhysicsImpostor(character.head, BABYLON.PhysicsImpostor.MeshImpostor, { mass: 5, restitution: 0 });
-    character.neck.physicsImpostor = new BABYLON.PhysicsImpostor(character.neck, BABYLON.PhysicsImpostor.MeshImpostor, { mass: 5, restitution: 0 });
+    character.rt_downleg.physicsImpostor = new BABYLON.PhysicsImpostor(character.rt_downleg, BABYLON.PhysicsImpostor.CylinderImpostor, { mass: 5, restitution: 1 });
+    character.lt_downleg.physicsImpostor = new BABYLON.PhysicsImpostor(character.lt_downleg, BABYLON.PhysicsImpostor.CylinderImpostor, { mass: 5, restitution: 1 });
 
-    character.body.physicsImpostor = new BABYLON.PhysicsImpostor(character.body, BABYLON.PhysicsImpostor.MeshImpostor, { mass: 5, restitution: 0 });
+    character.rt_upperleg.physicsImpostor = new BABYLON.PhysicsImpostor(character.rt_upperleg, BABYLON.PhysicsImpostor.CylinderImpostor, { mass: 5, restitution: 1 });
+    character.lt_upperleg.physicsImpostor = new BABYLON.PhysicsImpostor(character.lt_upperleg, BABYLON.PhysicsImpostor.CylinderImpostor, { mass: 5, restitution: 1 });
+
+    character.head.physicsImpostor = new BABYLON.PhysicsImpostor(character.head, BABYLON.PhysicsImpostor.BoxImpostor, { mass: 5, restitution: 1 });
+    character.neck.physicsImpostor = new BABYLON.PhysicsImpostor(character.neck, BABYLON.PhysicsImpostor.CylinderImpostor, { mass: 5, restitution: 1 });
+
+    character.body.physicsImpostor = new BABYLON.PhysicsImpostor(character.body, BABYLON.PhysicsImpostor.BoxImpostor, { mass: 5, restitution: 1 });
+
+    /*Ora problema: se noi lasciassimo tutto così, ogni parte del corpo si comporterebbe in maniera indipendente da ogni altra.
+     * Per ovviare a questo comportamento che non è quello che vogliamo realizzare, abbiamo bisogno di uno strumento di babylon (nessuno può mettere babylon in un angolo)
+     * ovvero i Joints (giunture e si comportano come tali)
+     */
 
     //Joint arms
     var jointArmRightBody = new BABYLON.PhysicsJoint(BABYLON.PhysicsJoint.HingeJoint, {
@@ -241,39 +251,43 @@ function setPhysicsToCharacter(character) {
     character.enablePhysics = true;
 }
 
+var nBullet = 30;
 
-
-var dude;
 var canvas;
 var engine;
 var scene;
 var character;
-var sphere;
+var sphere = [];
 var createScene = function () {
     canvas = document.getElementById('renderCanvas');
-    engine = new BABYLON.Engine(canvas, true);
+    engine = new BABYLON.Engine(canvas, true,{
+        deterministicLockstep: true,
+        lockstepMaxSteps: 4
+    });
     scene = new BABYLON.Scene(engine);
     engine.disableManifestCheck = true;
     engine.isPointerLock = false;
     scene.debugLayer.show();
-    scene.enablePhysics(new BABYLON.Vector3(0,  -9.81, 0), new BABYLON.OimoJSPlugin(400));
+    scene.enablePhysics(new BABYLON.Vector3(0, -9.8, 0), new BABYLON.OimoJSPlugin());
     scene.getPhysicsEngine().getPhysicsPlugin().world.timeStep = .001;
     //Adding a light
     var light = new BABYLON.PointLight("Omni", new BABYLON.Vector3(20, 20, 100), scene);
 
     //Adding an Arc Rotate Camera
-    var camera = new BABYLON.FreeCamera("Camera", new BABYLON.Vector3(0, 3, -10), scene); 
+    var camera = new BABYLON.FreeCamera("Camera", new BABYLON.Vector3(0, 3, -35), scene); 
     camera.attachControl(canvas, true);
 
+    //Adding an Follow Camera for Bullet
+    var cameraBullet = new BABYLON.FollowCamera("CameraBullet", camera.position, scene);
 
     //Mirino
     var advancedTexture = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI");
 
     var image = new BABYLON.GUI.Image("but", "../textures/mirino.png");
-    image.width = "400px";
-    image.height = "400px"; 
+    image.width = "600px";
+    image.height = "600px"; 
     advancedTexture.addControl(image);
-
+    
 
     // Move the light with the camera
     scene.registerBeforeRender(function () {
@@ -291,14 +305,15 @@ var createScene = function () {
         ground.physicsImpostor = new BABYLON.PhysicsImpostor(ground, BABYLON.PhysicsImpostor.BoxImpostor, { mass: 0, restitution: 0, friction: 1 }, scene);
 
 
-        character = new Character(newMeshes);
-   
+        character = new Character(newMeshes); 
 
         window.addEventListener('resize', function () {
             engine.resize();
         });
-
-
+        for (i = 0; i < nBullet; i++) {
+            sphere.push(BABYLON.Mesh.CreateSphere("sphere1", 16, 0.1, scene));
+            sphere[i].position = camera.position;
+        }
         engine.runRenderLoop(render);
 
     });
@@ -307,22 +322,41 @@ var createScene = function () {
     document.getElementById("renderCanvas").addEventListener("click", function () {
         // Our built-in 'sphere' shape. Params: name, subdivs, size, scene
         // Move the sphere upward 1/2 its height
-        sphere = BABYLON.Mesh.CreateSphere("sphere1", 16, 0.1, scene);
-        sphere.position = camera.position; 
-
-        var drctn = BABYLON.Ray.CreateNewFromTo(camera.position, camera.getTarget()).direction; 
-        var impulse = drctn.scale(250);
-        sphere.physicsImpostor = new BABYLON.PhysicsImpostor(sphere, BABYLON.PhysicsImpostor.SphereImpostor, { mass: 100 });
-
-        sphere.physicsImpostor.applyImpulse(impulse, sphere.position);
-        if (character.enablePhysics === false)
-            setPhysicsToCharacter(character);
+        
+        var bullet = sphere[shot];
+        bullet.position = camera.position;
+        var drctn = BABYLON.Ray.CreateNewFromTo(camera.position, camera.getTarget()).direction;
+        var impulse = drctn.scale(80); 
+        bullet.physicsImpostor = new BABYLON.PhysicsImpostor(bullet, BABYLON.PhysicsImpostor.BoxImpostor, { mass: 500.5, restitution: 0 }); 
+        bullet.physicsImpostor.applyImpulse(impulse, bullet.position);  
+        shot++;
+        bullet.physicsImpostor.onCollideEvent = function (main, collided) {
+            image.isVisible = true;
+            scene.activeCamera = camera;
+            main.onCollideEvent = null;
+        };
+        //Fai partire camera che segue proiettile 
+        cameraBullet.heightOffset = 0;
+        cameraBullet.radius = 5;
+        cameraBullet.rotationOffset = 180;
+        cameraBullet.lockedTarget = bullet;
+        scene.activeCamera = cameraBullet;
+        image.isVisible = false;
     });
 
     return scene;
 }; 
+var shot = 0;
 function render() {
-     
+    for (i = 0; i < sphere.length; i++) {
+        character.parts.forEach(function (e) {
+            if (e.intersectsMesh(sphere[i], true)) { 
+                if (character.enablePhysics === false)
+                    setPhysicsToCharacter(character);
+                //sphere[i].visibility = 0;
+            }
+        });
+    }
     scene.render();
 
 } 
@@ -352,44 +386,103 @@ function animation() {
 
     moveRightLeg_keys.push({
         frame: 0,
-        value: new BABYLON.Quaternion.RotationAxis(axis, 0.2792527).toEulerAngles()
+        value: new BABYLON.Quaternion.RotationAxis(axis, -0.28).toEulerAngles()
     });
 
-
-
-    var movein_keys = [];
-    movein_keys.push({
-        frame: 0,
-        value: new BABYLON.Quaternion.RotationAxis(axis, 0).toEulerAngles()
-    });
-
-    movein_keys.push({
+    moveRightLeg_keys.push({
         frame: 1 * frameRate,
-        value: new BABYLON.Quaternion.RotationAxis(axis, 0.61).toEulerAngles()
-    }); 
+        value: new BABYLON.Quaternion.RotationAxis(axis, 0).toEulerAngles()
+    });
 
-    movein_keys.push({
+    moveRightLeg_keys.push({
         frame: 2 * frameRate,
-        value: new BABYLON.Quaternion.RotationAxis(axis, 0.61).toEulerAngles()
+        value: new BABYLON.Quaternion.RotationAxis(axis, 0.35).toEulerAngles()
     });
-    movein_keys.push({
+
+    moveRightLeg_keys.push({
         frame: 3 * frameRate,
-        value: new BABYLON.Quaternion.RotationAxis(axis, 0).toEulerAngles()
+        value: new BABYLON.Quaternion.RotationAxis(axis, 0.87).toEulerAngles()
     });
-    movein_keys.push({
+
+    moveRightLeg_keys.push({
         frame: 4 * frameRate,
-        value: new BABYLON.Quaternion.RotationAxis(axis, -0.38).toEulerAngles()
+        value: new BABYLON.Quaternion.RotationAxis(axis, 0.59).toEulerAngles()
     });
-    movein_keys.push({
+
+    moveRightLeg_keys.push({
         frame: 5 * frameRate,
-        value: new BABYLON.Quaternion.RotationAxis(axis, -0.26).toEulerAngles()
+        value: new BABYLON.Quaternion.RotationAxis(axis, 0.59).toEulerAngles()
     });
-    movein_keys.push({
+
+    moveRightLeg_keys.push({
         frame: 6 * frameRate,
+        value: new BABYLON.Quaternion.RotationAxis(axis, 0.09).toEulerAngles()
+    });
+
+    moveRightLeg_keys.push({
+        frame: 7 * frameRate,
+        value: new BABYLON.Quaternion.RotationAxis(axis, -0.35).toEulerAngles()
+    });
+    moveRightLeg_keys.push({
+        frame: 8 * frameRate,
+        value: new BABYLON.Quaternion.RotationAxis(axis, -0.28).toEulerAngles()
+    });
+
+
+
+    var moveLeftLeg = new BABYLON.Animation("moveLeftLeg", "rotation", 5, BABYLON.Animation.ANIMATIONTYPE_VECTOR3, BABYLON.Animation.ANIMATIONLOOPMODE_CYCLE);
+
+    var moveLeftLeg_keys = [];
+    moveLeftLeg_keys.push({
+        frame: 0 * frameRate,
+        value: new BABYLON.Quaternion.RotationAxis(axis, 0.59).toEulerAngles()
+    });
+
+    moveLeftLeg_keys.push({
+        frame: 1 * frameRate,
+        value: new BABYLON.Quaternion.RotationAxis(axis, 0.59).toEulerAngles()
+    });
+
+    moveLeftLeg_keys.push({
+        frame: 2 * frameRate,
+        value: new BABYLON.Quaternion.RotationAxis(axis, 0.09).toEulerAngles()
+    });
+
+    moveLeftLeg_keys.push({
+        frame: 3 * frameRate,
+        value: new BABYLON.Quaternion.RotationAxis(axis, -0.35).toEulerAngles()
+    });
+
+    moveLeftLeg_keys.push({
+        frame: 4 * frameRate,
+        value: new BABYLON.Quaternion.RotationAxis(axis, -0.28).toEulerAngles()
+    });
+
+    moveLeftLeg_keys.push({
+        frame: 5 * frameRate,
         value: new BABYLON.Quaternion.RotationAxis(axis, 0).toEulerAngles()
     });
+
+    moveLeftLeg_keys.push({
+        frame: 6 * frameRate,
+        value: new BABYLON.Quaternion.RotationAxis(axis, 0.35).toEulerAngles()
+    });
+
+    moveLeftLeg_keys.push({
+        frame: 7 * frameRate,
+        value: new BABYLON.Quaternion.RotationAxis(axis, 0.87).toEulerAngles()
+    });
+    moveLeftLeg_keys.push({
+        frame: 8 * frameRate,
+        value: new BABYLON.Quaternion.RotationAxis(axis, 0.59).toEulerAngles()
+    });
+
     console.log(new BABYLON.Quaternion.RotationAxis(axis, Math.PI/2).toEulerAngles());
-    movein.setKeys(movein_keys);
-    character.rt_upperleg.animation = movein; 
-    scene.beginDirectAnimation(character.rt_upperleg, [movein], 0, 6 * frameRate, true );
+    movein.setKeys(moveRightLeg_keys);
+    moveLeftLeg.setKeys(moveLeftLeg_keys);
+
+    var animationGroupWalk = new BABYLON.AnimationGroup("Walk");
+    animationGroupWalk.addTargetedAnimation(movein, character.rt_upperleg);
+    animationGroupWalk.addTargetedAnimation(moveLeftLeg, character.lt_upperleg);
+    animationGroupWalk.play(true);
 }
