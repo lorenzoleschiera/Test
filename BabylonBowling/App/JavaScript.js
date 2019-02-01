@@ -1,266 +1,28 @@
-﻿ 
-function Character(mesh) {
-    this.parts = mesh;
-    this.head = mesh[0];
-    this.neck = mesh[1];
-    this.body = mesh[2]; 
-    this.rt_forearm = mesh[8];
-    this.lt_forearm = mesh[5];
-    this.rt_arm = mesh[14];
-    this.lt_arm = mesh[4];
-    this.rt_hand = mesh[11];
-    this.lt_hand = mesh[3];
-    this.rt_upperleg = mesh[9];
-    this.lt_upperleg = mesh[6];
-    this.rt_downleg = mesh[10];
-    this.lt_downleg = mesh[7];
-    this.rt_foot = mesh[13];
-    this.lt_foot = mesh[12];
-
-    this.enablePhysics = false;
-     
- 
-    
-
-    this.lt_arm.addChild(this.lt_forearm);
-    this.lt_forearm.addChild(this.lt_hand);
-    this.rt_arm.addChild(this.rt_forearm);
-    this.rt_forearm.addChild(this.rt_hand);
-    this.lt_downleg.addChild(this.lt_foot);
-    this.lt_upperleg.addChild(this.lt_downleg);
-    this.rt_downleg.addChild(this.rt_foot);
-    this.rt_upperleg.addChild(this.rt_downleg);
-    this.neck.addChild(this.head);
-    this.body.addChild(this.neck);
-    this.body.addChild(this.lt_arm);
-    this.body.addChild(this.rt_arm);
-    this.body.addChild(this.lt_upperleg);
-    this.body.addChild(this.rt_upperleg);
-
-
-
-}
-function setPhysicsToCharacter(character) {
-    /*
-     * We remove at all parts of character their children because
-     * otherwise the physics is the aggregation to the parent
-     * es: if I put the physic on the hand and on the forearm,
-     * the engine put the sum of two physics only on the forearm
-     */ 
-    character.lt_arm.removeChild(character.lt_forearm);
-    character.lt_forearm.removeChild(character.lt_hand);
-    character.rt_arm.removeChild(character.rt_forearm);
-    character.rt_forearm.removeChild(character.rt_hand);
-    character.lt_downleg.removeChild(character.lt_foot);
-    character.lt_upperleg.removeChild(character.lt_downleg);
-    character.rt_downleg.removeChild(character.rt_foot);
-    character.rt_upperleg.removeChild(character.rt_downleg);
-    character.neck.removeChild(character.head);
-    character.body.removeChild(character.neck);
-    character.body.removeChild(character.lt_arm);
-    character.body.removeChild(character.rt_arm);
-    character.body.removeChild(character.lt_upperleg);
-    character.body.removeChild(character.rt_upperleg);
-     
-    /* Inseriamo l'impostore per ogni parte del corpo, con il suo peso, restitution( la forza elastica che esercita su un corpo che collide con esso),
-     * potremmo aggiungere anche la friction: ovvero l'attrito.
-     */
-   
-    character.rt_hand.physicsImpostor = new BABYLON.PhysicsImpostor(character.rt_hand, BABYLON.PhysicsImpostor.CylinderImpostor, { mass: 5, restitution: 1 });
-    character.lt_hand.physicsImpostor = new BABYLON.PhysicsImpostor(character.lt_hand, BABYLON.PhysicsImpostor.CylinderImpostor, { mass: 5, restitution: 1 });
-
-    character.rt_forearm.physicsImpostor = new BABYLON.PhysicsImpostor(character.rt_forearm, BABYLON.PhysicsImpostor.CylinderImpostor, { mass: 5, restitution: 1 });
-    character.lt_forearm.physicsImpostor = new BABYLON.PhysicsImpostor(character.lt_forearm, BABYLON.PhysicsImpostor.CylinderImpostor, { mass: 5, restitution: 1 });
-
-    character.rt_arm.physicsImpostor = new BABYLON.PhysicsImpostor(character.rt_arm, BABYLON.PhysicsImpostor.CylinderImpostor, { mass: 5, restitution: 1 });
-    character.lt_arm.physicsImpostor = new BABYLON.PhysicsImpostor(character.lt_arm, BABYLON.PhysicsImpostor.CylinderImpostor, { mass: 5, restitution: 1 });
-   
-    character.rt_foot.physicsImpostor = new BABYLON.PhysicsImpostor(character.rt_foot, BABYLON.PhysicsImpostor.CylinderImpostor, { mass: 5, restitution: 1 });
-    character.lt_foot.physicsImpostor = new BABYLON.PhysicsImpostor(character.lt_foot, BABYLON.PhysicsImpostor.CylinderImpostor, { mass: 5, restitution: 1 });
-
-    character.rt_downleg.physicsImpostor = new BABYLON.PhysicsImpostor(character.rt_downleg, BABYLON.PhysicsImpostor.CylinderImpostor, { mass: 5, restitution: 1 });
-    character.lt_downleg.physicsImpostor = new BABYLON.PhysicsImpostor(character.lt_downleg, BABYLON.PhysicsImpostor.CylinderImpostor, { mass: 5, restitution: 1 });
-
-    character.rt_upperleg.physicsImpostor = new BABYLON.PhysicsImpostor(character.rt_upperleg, BABYLON.PhysicsImpostor.CylinderImpostor, { mass: 5, restitution: 1 });
-    character.lt_upperleg.physicsImpostor = new BABYLON.PhysicsImpostor(character.lt_upperleg, BABYLON.PhysicsImpostor.CylinderImpostor, { mass: 5, restitution: 1 });
-
-    character.head.physicsImpostor = new BABYLON.PhysicsImpostor(character.head, BABYLON.PhysicsImpostor.BoxImpostor, { mass: 5, restitution: 1 });
-    character.neck.physicsImpostor = new BABYLON.PhysicsImpostor(character.neck, BABYLON.PhysicsImpostor.CylinderImpostor, { mass: 5, restitution: 1 });
-
-    character.body.physicsImpostor = new BABYLON.PhysicsImpostor(character.body, BABYLON.PhysicsImpostor.BoxImpostor, { mass: 5, restitution: 1 });
-
-    /*Ora problema: se noi lasciassimo tutto così, ogni parte del corpo si comporterebbe in maniera indipendente da ogni altra.
-     * Per ovviare a questo comportamento che non è quello che vogliamo realizzare, abbiamo bisogno di uno strumento di babylon (nessuno può mettere babylon in un angolo)
-     * ovvero i Joints (giunture e si comportano come tali)
-     */
-
-    //Joint arms
-    var jointArmRightBody = new BABYLON.PhysicsJoint(BABYLON.PhysicsJoint.HingeJoint, {
-        collision: false,
-        mainPivot: new BABYLON.Vector3(-0.45, 0.6, 0),
-        connectedPivot: new BABYLON.Vector3(0, 0.4, 0),
-        mainAxis: new BABYLON.Vector3(1, 0, 1),
-        connectedAxis: new BABYLON.Vector3(-1, 0, -1)
-
-    });
-    character.body.physicsImpostor.addJoint(character.rt_arm.physicsImpostor, jointArmRightBody);
-
-    var jointArmLeftBody = new BABYLON.PhysicsJoint(BABYLON.PhysicsJoint.HingeJoint, {
-        collision: false,
-        mainPivot: new BABYLON.Vector3(0.45, 0.6, 0),
-        connectedPivot: new BABYLON.Vector3(0, 0.4, 0),
-        mainAxis: new BABYLON.Vector3(1, 0, 1),
-        connectedAxis: new BABYLON.Vector3(-1, 0, -1)
-
-    });
-    character.body.physicsImpostor.addJoint(character.lt_arm.physicsImpostor, jointArmLeftBody);
-
-
-    //Joint forearms
-    var jointForeArmRightBody = new BABYLON.PhysicsJoint(BABYLON.PhysicsJoint.HingeJoint, {
-        collision: false,
-        mainPivot: new BABYLON.Vector3(-0.1, -0.5, 0),
-        connectedPivot: new BABYLON.Vector3(0, 0.3, 0),
-        mainAxis: new BABYLON.Vector3(1, 0, 1),
-        connectedAxis: new BABYLON.Vector3(-1, 0, -1)
-
-    });
-    character.rt_arm.physicsImpostor.addJoint(character.rt_forearm.physicsImpostor, jointForeArmRightBody);
-
-    var jointForeArmLeftBody = new BABYLON.PhysicsJoint(BABYLON.PhysicsJoint.HingeJoint, {
-        collision: false,
-        mainPivot: new BABYLON.Vector3(0.1, -0.5, 0),
-        connectedPivot: new BABYLON.Vector3(0, 0.3, 0),
-        mainAxis: new BABYLON.Vector3(1, 0, 1),
-        connectedAxis: new BABYLON.Vector3(-1, 0, -1)
-
-    });
-    character.lt_arm.physicsImpostor.addJoint(character.lt_forearm.physicsImpostor, jointForeArmLeftBody);
-
-
-    //Joint hands
-    var jointHandRightBody = new BABYLON.PhysicsJoint(BABYLON.PhysicsJoint.HingeJoint, {
-        collision: false,
-        mainPivot: new BABYLON.Vector3(0, -0.4, 0),
-        connectedPivot: new BABYLON.Vector3(0, 0.15, 0),
-        mainAxis: new BABYLON.Vector3(1, 0, 0),
-        connectedAxis: new BABYLON.Vector3(-1, 0, 0)
-
-    });
-    character.rt_forearm.physicsImpostor.addJoint(character.rt_hand.physicsImpostor, jointHandRightBody);
-
-    var jointHandLeftBody = new BABYLON.PhysicsJoint(BABYLON.PhysicsJoint.HingeJoint, {
-        collision: false,
-        mainPivot: new BABYLON.Vector3(0, -0.4, 0),
-        connectedPivot: new BABYLON.Vector3(0, 0.15, 0),
-        mainAxis: new BABYLON.Vector3(1, 0, 0),
-        connectedAxis: new BABYLON.Vector3(1, 0, 0)
-
-    });
-    character.lt_forearm.physicsImpostor.addJoint(character.lt_hand.physicsImpostor, jointHandLeftBody);
-
-
-    //Joint upperlegs
-    var jointUpperLegRightBody = new BABYLON.PhysicsJoint(BABYLON.PhysicsJoint.HingeJoint, {
-        collision: false,
-        mainPivot: new BABYLON.Vector3(-0.2, -0.75, 0),
-        connectedPivot: new BABYLON.Vector3(0, 0.5, 0),
-        mainAxis: new BABYLON.Vector3(1, 0, 1),
-        connectedAxis: new BABYLON.Vector3(-1, 0, -1)
-
-    });
-    character.body.physicsImpostor.addJoint(character.rt_upperleg.physicsImpostor, jointUpperLegRightBody);
-
-    var jointUpperLegLeftBody = new BABYLON.PhysicsJoint(BABYLON.PhysicsJoint.HingeJoint, {
-        collision: false,
-        mainPivot: new BABYLON.Vector3(0.2, -0.75, 0),
-        connectedPivot: new BABYLON.Vector3(0, 0.5, 0),
-        mainAxis: new BABYLON.Vector3(1, 0, 1),
-        connectedAxis: new BABYLON.Vector3(-1, 0, -1)
-
-    });
-    character.body.physicsImpostor.addJoint(character.lt_upperleg.physicsImpostor, jointUpperLegLeftBody);
-
-
-    //Joint lowerlegs
-    var jointLowerLegRight = new BABYLON.PhysicsJoint(BABYLON.PhysicsJoint.HingeJoint, {
-        collision: false,
-        mainPivot: new BABYLON.Vector3(-0.05, -0.5, 0),
-        connectedPivot: new BABYLON.Vector3(0, 0.5, 0),
-        mainAxis: new BABYLON.Vector3(1, 0, 1),
-        connectedAxis: new BABYLON.Vector3(-1, 0, -1)
-
-    });
-    character.rt_upperleg.physicsImpostor.addJoint(character.rt_downleg.physicsImpostor, jointLowerLegRight);
-
-    var jointLowerLegLeft = new BABYLON.PhysicsJoint(BABYLON.PhysicsJoint.HingeJoint, {
-        collision: false,
-        mainPivot: new BABYLON.Vector3(0.05, -0.5, 0),
-        connectedPivot: new BABYLON.Vector3(0, 0.5, 0),
-        mainAxis: new BABYLON.Vector3(1, 0, 1),
-        connectedAxis: new BABYLON.Vector3(-1, 0, -1)
-
-    });
-    character.lt_upperleg.physicsImpostor.addJoint(character.lt_downleg.physicsImpostor, jointLowerLegLeft);
-
-
-    //Joint Foot
-    var jointFeetRight = new BABYLON.PhysicsJoint(BABYLON.PhysicsJoint.HingeJoint, {
-        collision: false,
-        mainPivot: new BABYLON.Vector3(0, -0.5, 0),
-        connectedPivot: new BABYLON.Vector3(0, 0.05, 0.06),
-        mainAxis: new BABYLON.Vector3(1, 0, 1),
-        connectedAxis: new BABYLON.Vector3(-1, 0, -1)
-
-    });
-    character.rt_downleg.physicsImpostor.addJoint(character.rt_foot.physicsImpostor, jointFeetRight);
-
-    var jointFeetLeft = new BABYLON.PhysicsJoint(BABYLON.PhysicsJoint.HingeJoint, {
-        collision: false,
-        mainPivot: new BABYLON.Vector3(0, -0.5, 0),
-        connectedPivot: new BABYLON.Vector3(0, 0.05, 0.06),
-        mainAxis: new BABYLON.Vector3(1, 0, 1),
-        connectedAxis: new BABYLON.Vector3(-1, 0, -1)
-
-    });
-    character.lt_downleg.physicsImpostor.addJoint(character.lt_foot.physicsImpostor, jointFeetLeft);
-
-
-    //Joint Neck Head
-    var jointNeck = new BABYLON.PhysicsJoint(BABYLON.PhysicsJoint.HingeJoint, {
-        collision: false,
-        mainPivot: new BABYLON.Vector3(0, 0.9, 0),
-        connectedPivot: new BABYLON.Vector3(0, 0.0, 0.0),
-        mainAxis: new BABYLON.Vector3(0, 1, 1),
-        connectedAxis: new BABYLON.Vector3(0, -1, -1)
-
-    });
-    character.body.physicsImpostor.addJoint(character.neck.physicsImpostor, jointNeck);
-
-    var jointHead = new BABYLON.PhysicsJoint(BABYLON.PhysicsJoint.HingeJoint, {
-        collision: false,
-        mainPivot: new BABYLON.Vector3(0, 0, 0),
-        connectedPivot: new BABYLON.Vector3(0, -0.3, 0),
-        mainAxis: new BABYLON.Vector3(1, 0, 1),
-        connectedAxis: new BABYLON.Vector3(-1, 0, -1)
-
-    });
-    character.neck.physicsImpostor.addJoint(character.head.physicsImpostor, jointHead);
-
-
-    character.enablePhysics = true;
-}
-
-var nBullet = 30;
+﻿
+var nBullet = 20;
 
 var canvas;
 var engine;
+var camera;
 var scene;
+var image;
 var character;
+var character2;
+var character3;
+var character4;
+var character5;
+var skybox;
+var animation1;
+var animation2;
 var sphere = [];
-var createScene = function () {
+var bullet = null;
+var cameraBullet;
+
+var slideZ;
+var slideX;
+var createScene = function () { 
     canvas = document.getElementById('renderCanvas');
-    engine = new BABYLON.Engine(canvas, true,{
+    engine = new BABYLON.Engine(canvas, true, {
         deterministicLockstep: true,
         lockstepMaxSteps: 4
     });
@@ -268,98 +30,306 @@ var createScene = function () {
     engine.disableManifestCheck = true;
     engine.isPointerLock = false;
     scene.debugLayer.show();
-    scene.enablePhysics(new BABYLON.Vector3(0, -9.8, 0), new BABYLON.OimoJSPlugin());
+    console.log(SettingValue.gravity);
+    scene.enablePhysics(SettingValue.gravity, new BABYLON.OimoJSPlugin());
     scene.getPhysicsEngine().getPhysicsPlugin().world.timeStep = .001;
     //Adding a light
-    var light = new BABYLON.PointLight("Omni", new BABYLON.Vector3(20, 20, 100), scene);
+    var light = getLight();
 
-    //Adding an Arc Rotate Camera
-    var camera = new BABYLON.FreeCamera("Camera", new BABYLON.Vector3(0, 3, -35), scene); 
-    camera.attachControl(canvas, true);
+    scene.activeCamera = cameraActivation();
 
+    camera = scene.activeCamera;
+    
     //Adding an Follow Camera for Bullet
-    var cameraBullet = new BABYLON.FollowCamera("CameraBullet", camera.position, scene);
+    cameraBullet = new BABYLON.FollowCamera("CameraBullet", camera.position, scene);
 
     //Mirino
     var advancedTexture = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI");
 
-    var image = new BABYLON.GUI.Image("but", "../textures/mirino.png");
+    image = new BABYLON.GUI.Image("but", "../textures/mirino.png");
     image.width = "600px";
-    image.height = "600px"; 
+    image.height = "600px";
     advancedTexture.addControl(image);
-    
+
+
+    var ground = BABYLON.Mesh.CreateGround("ground1", 60, 60, 2, scene);
+    ground.physicsImpostor = new BABYLON.PhysicsImpostor(ground, BABYLON.PhysicsImpostor.BoxImpostor, { mass: 0, restitution: 0, friction: 1 }, scene);
+
+    skybox = BABYLON.MeshBuilder.CreateBox("skyBox", { size: 1000.0 }, scene);
+    var skyboxMaterial = new BABYLON.StandardMaterial("skyBox", scene);
+    var texture = getDaytimeTexture();
+    skyboxMaterial.backFaceCulling = false;
+    skyboxMaterial.reflectionTexture = new BABYLON.CubeTexture("/textures/" + texture + "/skyrender", scene);
+    skyboxMaterial.reflectionTexture.coordinatesMode = BABYLON.Texture.SKYBOX_MODE;
+    skyboxMaterial.diffuseColor = new BABYLON.Color3(0, 0, 0);
+    skyboxMaterial.specularColor = new BABYLON.Color3(0, 0, 0);
+    skybox.material = skyboxMaterial;
+
+    //scene.fogMode = BABYLON.Scene.FOGMODE_EXP2;
+    //scene.fogDensity = 0.001;
+    //scene.fogColor = new BABYLON.Color3(0.368, 0.368, 0.431);
+
+
+
 
     // Move the light with the camera
     scene.registerBeforeRender(function () {
-        light.position = camera.position;
+
 
     });
 
+    window.addEventListener('resize', function () {
+        engine.resize();
+    });
 
-    // The first parameter can be used to specify which mesh to import. Here we import all meshes
-    BABYLON.SceneLoader.ImportMesh("", "../assets/", "Character4.babylon", scene, function (newMeshes) {
+    var assetsManager = new BABYLON.AssetsManager(scene);
+    var meshTask = assetsManager.addMeshTask("character task", "", "../assets/", "Character4.babylon");
+    
+    meshTask.onSuccess = function (task) {
+        var newMeshes = task.loadedMeshes;
         // Set the target of the camera to the first imported mesh 
 
-        console.log(newMeshes.map(a => a.name));
-        var ground = BABYLON.Mesh.CreateGround("ground1", 60, 60, 2, scene);
-        ground.physicsImpostor = new BABYLON.PhysicsImpostor(ground, BABYLON.PhysicsImpostor.BoxImpostor, { mass: 0, restitution: 0, friction: 1 }, scene);
+
+        character = new Character(cloneArray(newMeshes,1));
+        character.body.position = new BABYLON.Vector3(86, 3, -64);
 
 
-        character = new Character(newMeshes); 
+        slideZ = walk(character);
+        animation1=animation(character);
 
-        window.addEventListener('resize', function () {
-            engine.resize();
-        });
-        for (i = 0; i < nBullet; i++) {
-            sphere.push(BABYLON.Mesh.CreateSphere("sphere1", 16, 0.1, scene));
-            sphere[i].position = camera.position;
-        }
+        character2 = new Character(cloneArray(newMeshes, 2));
+        character2.body.position = new BABYLON.Vector3(102, 11.5, -81);
+        character2.body.rotate(new BABYLON.Vector3(0, 1, 0), Math.PI / 2);
+
+        character3 = new Character(cloneArray(newMeshes, 3));
+        character3.body.position = new BABYLON.Vector3(72, 12.12, -98);
+        character3.body.rotate(new BABYLON.Vector3(0, 1, 0), Math.PI);
+
+        character4 = new Character(cloneArray(newMeshes, 4));
+        character4.body.position = new BABYLON.Vector3(66, 3, -64);
+        character4.body.rotate(new BABYLON.Vector3(0, 1, 0), Math.PI);
+
+        character5 = new Character(cloneArray(newMeshes, 5));
+        character5.body.position = new BABYLON.Vector3(68, 3, -90);
+        character5.body.rotate(new BABYLON.Vector3(0, 1, 0), Math.PI/2);
+
+        slideX = walk2(character5);
+        animation2=animation(character5);
+
         engine.runRenderLoop(render);
+    };
+    meshTask.onError = function (task, message, exception) {
+        console.log(message, exception);
+    };
+    var meshCityTask = assetsManager.addMeshTask("city task", "", "../assets/city/", "city.babylon");
+    meshCityTask.onSuccess = function (task) {
+        var newMeshes = task.loadedMeshes;
+        // Set the target of the camera to the first imported mesh 
+        //newMeshes.forEach(function (element) {
+        //    element.physicsImpostor = new BABYLON.PhysicsImpostor(element, BABYLON.PhysicsImpostor.MeshImpostor, { mass: 0, restitution: 0 });
+        //}); 
 
-    });
-    // Return the created scene.
-     
+
+    };
+    meshCityTask.onError = function (task, message, exception) {
+        console.log(message, exception);
+    };
+    var meshCollisionerTask = assetsManager.addMeshTask("collisioners task", "", "../assets/", "collisioner.babylon");
+    meshCollisionerTask.onSuccess = function (task) {
+        var newMeshes = task.loadedMeshes;
+        newMeshes.forEach(function (element) {
+            element.physicsImpostor = new BABYLON.PhysicsImpostor(element, BABYLON.PhysicsImpostor.MeshImpostor, { mass: 0, restitution: 0 });
+            element.visibility = false;
+        }); 
+
+
+    };
+    meshCollisionerTask.onError = function (task, message, exception) {
+        console.log(message, exception);
+    };
+    var bulletMeshTask = assetsManager.addMeshTask("bullet task", "", "../assets/", "bullet.babylon");
+    bulletMeshTask.onSuccess = function (task) {
+        var bulletMesh = task.loadedMeshes[0];
+        var bulletMaterial = new BABYLON.StandardMaterial("Copper", scene);
+
+        bulletMaterial.diffuseColor = new BABYLON.Color3(0.4, 0.2368, 0.1036);
+        bulletMaterial.specularColor = new BABYLON.Color3(0.25, 0.148, 0.06475);
+        bulletMaterial.ambientColor = new BABYLON.Color3(0.774597, 0.458561, 0.200621);
+
+        bulletMesh.material = bulletMaterial;
+        bulletMesh.position = camera.position;
+
+        bulletMesh.isPickable = false;
+        sphere.push(bulletMesh);
+        for (i = 0; i < nBullet - 1; i++) {
+            sphere.push(bulletMesh.clone("bullet " + i));
+        }
+    };
+    bulletMeshTask.onError = function (task, message, exception) {
+        console.log(message, exception);
+    };
+    assetsManager.load();
+
+
     document.getElementById("renderCanvas").addEventListener("click", function () {
         // Our built-in 'sphere' shape. Params: name, subdivs, size, scene
         // Move the sphere upward 1/2 its height
-        
-        var bullet = sphere[shot];
+        bullet = sphere[shot];
         bullet.position = camera.position;
         var drctn = BABYLON.Ray.CreateNewFromTo(camera.position, camera.getTarget()).direction;
-        var impulse = drctn.scale(80); 
-        bullet.physicsImpostor = new BABYLON.PhysicsImpostor(bullet, BABYLON.PhysicsImpostor.BoxImpostor, { mass: 500.5, restitution: 0 }); 
-        bullet.physicsImpostor.applyImpulse(impulse, bullet.position);  
+        bullet.rotate(BABYLON.Axis.Y, camera.rotation.y, BABYLON.Space.LOCAL);
+        bullet.rotate(BABYLON.Axis.X, camera.rotation.x, BABYLON.Space.LOCAL);
+        bullet.rotate(BABYLON.Axis.Z, camera.rotation.z, BABYLON.Space.LOCAL);
+
+        bullet.physicsImpostor = new BABYLON.PhysicsImpostor(bullet, BABYLON.PhysicsImpostor.BoxImpostor, {
+            mass: 50.5, restitution: 0
+        });
+        var impulse = drctn.scale(130);
+        bullet.physicsImpostor.applyImpulse(impulse, bullet.getAbsolutePivotPoint());
+
+        bullet.rotate(BABYLON.Axis.Y, Math.PI, BABYLON.Space.LOCAL);
         shot++;
-        bullet.physicsImpostor.onCollideEvent = function (main, collided) {
-            image.isVisible = true;
-            scene.activeCamera = camera;
-            main.onCollideEvent = null;
-        };
+        //bullet.physicsImpostor.onCollideEvent = hit;
         //Fai partire camera che segue proiettile 
         cameraBullet.heightOffset = 0;
-        cameraBullet.radius = 5;
-        cameraBullet.rotationOffset = 180;
+        cameraBullet.radius = 3;
+        cameraBullet.rotationOffset = 45;
+        cameraBullet.cameraAcceleration = 0.1;
         cameraBullet.lockedTarget = bullet;
         scene.activeCamera = cameraBullet;
         image.isVisible = false;
+        timeout = setTimeout(hit, 10000);
+        animation1.pause();
+        animation2.pause();
+        slideZ.pause();
+        slideX.pause();
+        //reycast(camera.position, drctn);
     });
-
     return scene;
-}; 
+};
+var timeout;
 var shot = 0;
 function render() {
-    for (i = 0; i < sphere.length; i++) {
+    if (SettingValue.edited) {
+        scene.getPhysicsEngine().setGravity(SettingValue.gravity);
+
+        var skyboxMaterial = new BABYLON.StandardMaterial("skyBox", scene);
+        var texture = getDaytimeTexture();
+        skyboxMaterial.backFaceCulling = false;
+        skyboxMaterial.reflectionTexture = new BABYLON.CubeTexture("/textures/" + texture + "/skyrender", scene);
+        skyboxMaterial.reflectionTexture.coordinatesMode = BABYLON.Texture.SKYBOX_MODE;
+        skyboxMaterial.diffuseColor = new BABYLON.Color3(0, 0, 0);
+        skyboxMaterial.specularColor = new BABYLON.Color3(0, 0, 0);
+        skybox.material = skyboxMaterial;
+
+        scene.activeCamera = cameraActivation(); 
+        camera = scene.activeCamera;
+        SettingValue.edited = false;    
+    }
+    if (bullet !== null) {
         character.parts.forEach(function (e) {
-            if (e.intersectsMesh(sphere[i], true)) { 
-                if (character.enablePhysics === false)
+            if (e.intersectsMesh(bullet, true)) {
+                if (character.enablePhysics === false) {
                     setPhysicsToCharacter(character);
-                //sphere[i].visibility = 0;
+                    e.physicsImpostor.applyImpulse(bullet.physicsImpostor.getLinearVelocity().normalize().scale(30), bullet.position);
+                    console.log(bullet.physicsImpostor.getLinearVelocity());
+                    console.log(bullet.physicsImpostor.getLinearVelocity().normalize().scale(10));
+                }
+                bullet.visibility = 0;
+                scene.activeCamera = new BABYLON.FollowCamera("Character1", cameraBullet.position, scene); 
+                scene.activeCamera.setTarget(character.body.position);
+            }
+        });
+        character2.parts.forEach(function (e) {
+            if (e.intersectsMesh(bullet, true)) {
+                if (character2.enablePhysics === false) {
+                    setPhysicsToCharacter(character2);
+                    e.physicsImpostor.applyImpulse(bullet.physicsImpostor.getLinearVelocity().normalize().scale(30), bullet.position);
+                    console.log(bullet.physicsImpostor.getLinearVelocity());
+                    console.log(bullet.physicsImpostor.getLinearVelocity().normalize().scale(10));
+                }
+                bullet.visibility = 0;
+                scene.activeCamera = new BABYLON.FollowCamera("Character2", cameraBullet.position, scene);
+                scene.activeCamera.setTarget(character2.body.position);
+            }
+        });
+        character3.parts.forEach(function (e) {
+            if (e.intersectsMesh(bullet, true)) {
+                if (character3.enablePhysics === false) {
+                    setPhysicsToCharacter(character3);
+                    e.physicsImpostor.applyImpulse(bullet.physicsImpostor.getLinearVelocity().normalize().scale(30), bullet.position);
+                }
+                bullet.visibility = 0;
+                scene.activeCamera = new BABYLON.FollowCamera("Character3", cameraBullet.position, scene);
+                scene.activeCamera.setTarget(character3.body.position);
+            }
+        });
+        character4.parts.forEach(function (e) {
+            if (e.intersectsMesh(bullet, true)) {
+                if (character4.enablePhysics === false) {
+                    setPhysicsToCharacter(character4);
+                    e.physicsImpostor.applyImpulse(bullet.physicsImpostor.getLinearVelocity().normalize().scale(30), bullet.position);
+                }
+                bullet.visibility = 0;
+                scene.activeCamera = new BABYLON.FollowCamera("Character4", cameraBullet.position, scene);
+                scene.activeCamera.setTarget(character4.body.position);
+            }
+        });
+        character5.parts.forEach(function (e) {
+            if (e.intersectsMesh(bullet, true)) {
+                if (character5.enablePhysics === false) {
+                    setPhysicsToCharacter(character5);
+                    e.physicsImpostor.applyImpulse(bullet.physicsImpostor.getLinearVelocity().normalize().scale(30), bullet.position);
+                }
+                bullet.visibility = 0;
+                scene.activeCamera = new BABYLON.FollowCamera("Character5", cameraBullet.position, scene);
+                scene.activeCamera.setTarget(character5.body.position);
             }
         });
     }
+    //if (sphere !== [] && shot > 0 && hitMesh !== null) {
+    //    if (sphere[shot - 1].intersectsMesh(hitMesh, true)) { 
+    //        sphere[shot - 1].visibility = 0;
+    //        hit(sphere[shot - 1], hitMesh);
+    //        clearTimeout(timeout);
+    //    } 
+    //}
     scene.render();
+}
 
-} 
+var hitMesh;
+function reycast(origin, direction) {
+
+    var ray = new BABYLON.Ray(origin, direction, 100);
+
+    let rayHelper = new BABYLON.RayHelper(ray);
+    rayHelper.show(scene);
+
+    var hit = scene.pickWithRay(ray);
+
+    if (hit.pickedMesh) {
+        console.log(hit.pickedMesh);
+        hitMesh = hit.pickedMesh;
+    }
+}
+
+
+function hit(main, collided) {
+    image.isVisible = true;
+    scene.activeCamera = camera;
+    cameraBullet.position = camera.position;
+    //if (main !== null) {
+    //    main.onCollideEvent = null;
+    //} else {
+    //    sphere[shot - 1].onCollideEvent = null;
+    //}
+    console.log(animation1);
+    animation1.restart();
+    animation2.restart();
+    slideZ.restart();
+    slideX.restart();
+}
+
 
 document.onkeydown = function (e) {
     var keyCode = e.key;
@@ -372,522 +342,17 @@ document.onkeydown = function (e) {
     if (keyCode === 'p') {
         scene.getPhysicsEngine().getPhysicsPlugin().world.timeStep = 0.001;
     }
+    if (keyCode === 't') {
+        var camerat = new BABYLON.UniversalCamera("UniversalCamera", new BABYLON.Vector3(0, 0, -33), scene);
+
+        // Targets the camera to a particular position. In this case the scene origin
+        camerat.setTarget(sphere[0].position);
+        // Attach the camera to the canvas
+        camerat.attachControl(canvas, true);
+        scene.activeCamera = camerat;
+        sphere[0].rotate(BABYLON.Axis.Y, camera.rotation.y, BABYLON.Space.LOCAL);
+        sphere[0].rotate(BABYLON.Axis.X, camera.rotation.x, BABYLON.Space.LOCAL);
+        sphere[0].rotate(BABYLON.Axis.Z, camera.rotation.z, BABYLON.Space.LOCAL);
+    }
 };
 
-function animation() {
-    character.body.rotation.y += Math.PI/2;
-    var frameRate = 10;
-    //for camera move forward
-    var movein = new BABYLON.Animation("movein", "rotation", 5, BABYLON.Animation.ANIMATIONTYPE_VECTOR3, BABYLON.Animation.ANIMATIONLOOPMODE_CYCLE);
-
-    var axis = new BABYLON.Vector3(1, 0, 0);
-
-    var moveRightLeg_keys = [];
-
-    moveRightLeg_keys.push({
-        frame: 0,
-        value: new BABYLON.Quaternion.RotationAxis(axis, 0.90).toEulerAngles()
-    });
-
-    moveRightLeg_keys.push({
-        frame: 1 * frameRate,
-        value: new BABYLON.Quaternion.RotationAxis(axis, 0.40).toEulerAngles()
-    });
-
-    moveRightLeg_keys.push({
-        frame: 2 * frameRate,
-        value: new BABYLON.Quaternion.RotationAxis(axis, 0.20).toEulerAngles()
-    });
-
-    moveRightLeg_keys.push({
-        frame: 3 * frameRate,
-        value: new BABYLON.Quaternion.RotationAxis(axis, 0.00).toEulerAngles()
-    });
-
-    moveRightLeg_keys.push({
-        frame: 4 * frameRate,
-        value: new BABYLON.Quaternion.RotationAxis(axis, -0.40).toEulerAngles()
-    });
-
-    moveRightLeg_keys.push({
-        frame: 5 * frameRate,
-        value: new BABYLON.Quaternion.RotationAxis(axis, -0.20).toEulerAngles()
-    });
-
-    moveRightLeg_keys.push({
-        frame: 6 * frameRate,
-        value: new BABYLON.Quaternion.RotationAxis(axis, 0.20).toEulerAngles()
-    });
-
-    moveRightLeg_keys.push({
-        frame: 7 * frameRate,
-        value: new BABYLON.Quaternion.RotationAxis(axis, 0.40).toEulerAngles()
-    });
-    moveRightLeg_keys.push({
-        frame: 8 * frameRate,
-        value: new BABYLON.Quaternion.RotationAxis(axis, 0.90).toEulerAngles()
-    });
-
-    var moveLeftLeg = new BABYLON.Animation("moveLeftLeg", "rotation", 5, BABYLON.Animation.ANIMATIONTYPE_VECTOR3, BABYLON.Animation.ANIMATIONLOOPMODE_CYCLE);
-
-    var moveLeftLeg_keys = [];
-    moveLeftLeg_keys.push({
-        frame: 0 * frameRate,
-        value: new BABYLON.Quaternion.RotationAxis(axis, -0.40).toEulerAngles()
-    });
-
-    moveLeftLeg_keys.push({
-        frame: 1 * frameRate,
-        value: new BABYLON.Quaternion.RotationAxis(axis, -0.20).toEulerAngles()
-    });
-
-    moveLeftLeg_keys.push({
-        frame: 2 * frameRate,
-        value: new BABYLON.Quaternion.RotationAxis(axis, 0.20).toEulerAngles()
-    });
-
-    moveLeftLeg_keys.push({
-        frame: 3 * frameRate,
-        value: new BABYLON.Quaternion.RotationAxis(axis, 0.40).toEulerAngles()
-    });
-
-    moveLeftLeg_keys.push({
-        frame: 4 * frameRate,
-        value: new BABYLON.Quaternion.RotationAxis(axis, 0.90).toEulerAngles()
-    });
-
-    moveLeftLeg_keys.push({
-        frame: 5 * frameRate,
-        value: new BABYLON.Quaternion.RotationAxis(axis, 0.40).toEulerAngles()
-    });
-
-    moveLeftLeg_keys.push({
-        frame: 6 * frameRate,
-        value: new BABYLON.Quaternion.RotationAxis(axis, 0.20).toEulerAngles()
-    });
-
-    moveLeftLeg_keys.push({
-        frame: 7 * frameRate,
-        value: new BABYLON.Quaternion.RotationAxis(axis, 0.00).toEulerAngles()
-    });
-
-    moveLeftLeg_keys.push({
-        frame: 8 * frameRate,
-        value: new BABYLON.Quaternion.RotationAxis(axis, -0.40).toEulerAngles()
-    });
-
-
-    var moveRightLegDown_keys = [];
-
-    moveRightLegDown_keys.push({
-        frame: 0,
-        value: new BABYLON.Quaternion.RotationAxis(axis, -0.70).toEulerAngles()
-    });
-
-    moveRightLegDown_keys.push({
-        frame: 1 * frameRate,
-        value: new BABYLON.Quaternion.RotationAxis(axis, -0.60).toEulerAngles()
-    });
-
-    moveRightLegDown_keys.push({
-        frame: 2 * frameRate,
-        value: new BABYLON.Quaternion.RotationAxis(axis, -0.40).toEulerAngles()
-    });
-
-    moveRightLegDown_keys.push({
-        frame: 3 * frameRate,
-        value: new BABYLON.Quaternion.RotationAxis(axis, 0.00).toEulerAngles()
-    });
-
-    moveRightLegDown_keys.push({
-        frame: 4 * frameRate,
-        value: new BABYLON.Quaternion.RotationAxis(axis, -0.40).toEulerAngles()
-    });
-
-    moveRightLegDown_keys.push({
-        frame: 5 * frameRate,
-        value: new BABYLON.Quaternion.RotationAxis(axis, -0.60).toEulerAngles()
-    });
-
-    moveRightLegDown_keys.push({
-        frame: 6 * frameRate,
-        value: new BABYLON.Quaternion.RotationAxis(axis, -0.70).toEulerAngles()
-    });
-
-    moveRightLegDown_keys.push({
-        frame: 7 * frameRate,
-        value: new BABYLON.Quaternion.RotationAxis(axis, -1.00).toEulerAngles()
-    });
-    moveRightLegDown_keys.push({
-        frame: 8 * frameRate,
-        value: new BABYLON.Quaternion.RotationAxis(axis, -0.70).toEulerAngles()
-    });
-    var moveRightLegDown = new BABYLON.Animation("moveRightLegDown", "rotation", 5, BABYLON.Animation.ANIMATIONTYPE_VECTOR3, BABYLON.Animation.ANIMATIONLOOPMODE_CYCLE);
-
-
-    var moveLeftLegDown_keys = [];
-    moveLeftLegDown_keys.push({
-        frame: 0 * frameRate,
-        value: new BABYLON.Quaternion.RotationAxis(axis, 0.00).toEulerAngles()
-    });
-
-    moveLeftLegDown_keys.push({
-        frame: 1 * frameRate,
-        value: new BABYLON.Quaternion.RotationAxis(axis, -0.40).toEulerAngles()
-    });
-
-    moveLeftLegDown_keys.push({
-        frame: 2 * frameRate,
-        value: new BABYLON.Quaternion.RotationAxis(axis, -0.60).toEulerAngles()
-    });
-
-    moveLeftLegDown_keys.push({
-        frame: 3 * frameRate,
-        value: new BABYLON.Quaternion.RotationAxis(axis, -0.70).toEulerAngles()
-    });
-
-    moveLeftLegDown_keys.push({
-        frame: 4 * frameRate,
-        value: new BABYLON.Quaternion.RotationAxis(axis, -1.00).toEulerAngles()
-    });
-
-    moveLeftLegDown_keys.push({
-        frame: 5 * frameRate,
-        value: new BABYLON.Quaternion.RotationAxis(axis, -0.70).toEulerAngles()
-    });
-
-    moveLeftLegDown_keys.push({
-        frame: 6 * frameRate,
-        value: new BABYLON.Quaternion.RotationAxis(axis, -0.60).toEulerAngles()
-    });
-
-    moveLeftLegDown_keys.push({
-        frame: 7 * frameRate,
-        value: new BABYLON.Quaternion.RotationAxis(axis, -0.40).toEulerAngles()
-    });
-    moveLeftLegDown_keys.push({
-        frame: 8 * frameRate,
-        value: new BABYLON.Quaternion.RotationAxis(axis, 0.00).toEulerAngles()
-    });
-
-    var moveLeftLegDown = new BABYLON.Animation("moveLeftLegDown", "rotation", 5, BABYLON.Animation.ANIMATIONTYPE_VECTOR3, BABYLON.Animation.ANIMATIONLOOPMODE_CYCLE);
-    var moveRightLegDown = new BABYLON.Animation("moveRightLegDown", "rotation", 5, BABYLON.Animation.ANIMATIONTYPE_VECTOR3, BABYLON.Animation.ANIMATIONLOOPMODE_CYCLE);
-
-    var moveLeftArm_keys = [];
-
-    moveLeftArm_keys.push({
-        frame: 0,
-        value: new BABYLON.Quaternion.RotationAxis(axis, 0.90).toEulerAngles()
-    });
-
-    moveLeftArm_keys.push({
-        frame: 1 * frameRate,
-        value: new BABYLON.Quaternion.RotationAxis(axis, 0.40).toEulerAngles()
-    });
-
-    moveLeftArm_keys.push({
-        frame: 2 * frameRate,
-        value: new BABYLON.Quaternion.RotationAxis(axis, 0.20).toEulerAngles()
-    });
-
-    moveLeftArm_keys.push({
-        frame: 3 * frameRate,
-        value: new BABYLON.Quaternion.RotationAxis(axis, 0.00).toEulerAngles()
-    });
-
-    moveLeftArm_keys.push({
-        frame: 4 * frameRate,
-        value: new BABYLON.Quaternion.RotationAxis(axis, -0.40).toEulerAngles()
-    });
-
-    moveLeftArm_keys.push({
-        frame: 5 * frameRate,
-        value: new BABYLON.Quaternion.RotationAxis(axis, -0.20).toEulerAngles()
-    });
-
-    moveLeftArm_keys.push({
-        frame: 6 * frameRate,
-        value: new BABYLON.Quaternion.RotationAxis(axis, 0.20).toEulerAngles()
-    });
-
-    moveLeftArm_keys.push({
-        frame: 7 * frameRate,
-        value: new BABYLON.Quaternion.RotationAxis(axis, 0.40).toEulerAngles()
-    });
-    moveLeftArm_keys.push({
-        frame: 8 * frameRate,
-        value: new BABYLON.Quaternion.RotationAxis(axis, 0.90).toEulerAngles()
-    });
-    var moveLeftLeg = new BABYLON.Animation("moveLeftLeg", "rotation", 5, BABYLON.Animation.ANIMATIONTYPE_VECTOR3, BABYLON.Animation.ANIMATIONLOOPMODE_CYCLE);
-
-    var moveRightArm_keys = [];
-    moveRightArm_keys.push({
-        frame: 0 * frameRate,
-        value: new BABYLON.Quaternion.RotationAxis(axis, -0.40).toEulerAngles()
-    });
-
-    moveRightArm_keys.push({
-        frame: 1 * frameRate,
-        value: new BABYLON.Quaternion.RotationAxis(axis, -0.20).toEulerAngles()
-    });
-
-    moveRightArm_keys.push({
-        frame: 2 * frameRate,
-        value: new BABYLON.Quaternion.RotationAxis(axis, 0.20).toEulerAngles()
-    });
-
-    moveRightArm_keys.push({
-        frame: 3 * frameRate,
-        value: new BABYLON.Quaternion.RotationAxis(axis, 0.40).toEulerAngles()
-    });
-
-    moveRightArm_keys.push({
-        frame: 4 * frameRate,
-        value: new BABYLON.Quaternion.RotationAxis(axis, 0.90).toEulerAngles()
-    });
-
-    moveRightArm_keys.push({
-        frame: 5 * frameRate,
-        value: new BABYLON.Quaternion.RotationAxis(axis, 0.40).toEulerAngles()
-    });
-
-    moveRightArm_keys.push({
-        frame: 6 * frameRate,
-        value: new BABYLON.Quaternion.RotationAxis(axis, 0.20).toEulerAngles()
-    });
-
-    moveRightArm_keys.push({
-        frame: 7 * frameRate,
-        value: new BABYLON.Quaternion.RotationAxis(axis, 0.00).toEulerAngles()
-    });
-
-    moveRightArm_keys.push({
-        frame: 8 * frameRate,
-        value: new BABYLON.Quaternion.RotationAxis(axis, -0.40).toEulerAngles()
-    });
-    var moveLeftArm = new BABYLON.Animation("moveLeftArm_keys", "rotation", 5, BABYLON.Animation.ANIMATIONTYPE_VECTOR3, BABYLON.Animation.ANIMATIONLOOPMODE_CYCLE);
-    var moveRightArm = new BABYLON.Animation("moveRightArm_keys", "rotation", 5, BABYLON.Animation.ANIMATIONTYPE_VECTOR3, BABYLON.Animation.ANIMATIONLOOPMODE_CYCLE);
-
-
-
-
-
-    var moveLeftForearm_keys = [];
-
-    moveLeftForearm_keys.push({
-        frame: 0,
-        value: new BABYLON.Quaternion.RotationAxis(axis, 0.70).toEulerAngles()
-    });
-
-    moveLeftForearm_keys.push({
-        frame: 1 * frameRate,
-        value: new BABYLON.Quaternion.RotationAxis(axis, 0.60).toEulerAngles()
-    });
-
-    moveLeftForearm_keys.push({
-        frame: 2 * frameRate,
-        value: new BABYLON.Quaternion.RotationAxis(axis, 0.40).toEulerAngles()
-    });
-
-    moveLeftForearm_keys.push({
-        frame: 3 * frameRate,
-        value: new BABYLON.Quaternion.RotationAxis(axis, 0.00).toEulerAngles()
-    });
-
-    moveLeftForearm_keys.push({
-        frame: 4 * frameRate,
-        value: new BABYLON.Quaternion.RotationAxis(axis, 0.40).toEulerAngles()
-    });
-
-    moveLeftForearm_keys.push({
-        frame: 5 * frameRate,
-        value: new BABYLON.Quaternion.RotationAxis(axis, 0.60).toEulerAngles()
-    });
-
-    moveLeftForearm_keys.push({
-        frame: 6 * frameRate,
-        value: new BABYLON.Quaternion.RotationAxis(axis, 0.70).toEulerAngles()
-    });
-
-    moveLeftForearm_keys.push({
-        frame: 7 * frameRate,
-        value: new BABYLON.Quaternion.RotationAxis(axis, 1.00).toEulerAngles()
-    });
-    moveLeftForearm_keys.push({
-        frame: 8 * frameRate,
-        value: new BABYLON.Quaternion.RotationAxis(axis, 0.70).toEulerAngles()
-    });
-
-
-    var moveRightForearm_keys = [];
-    moveRightForearm_keys.push({
-        frame: 0 * frameRate,
-        value: new BABYLON.Quaternion.RotationAxis(axis, 0.00).toEulerAngles()
-    });
-
-    moveRightForearm_keys.push({
-        frame: 1 * frameRate,
-        value: new BABYLON.Quaternion.RotationAxis(axis, 0.40).toEulerAngles()
-    });
-
-    moveRightForearm_keys.push({
-        frame: 2 * frameRate,
-        value: new BABYLON.Quaternion.RotationAxis(axis, 0.60).toEulerAngles()
-    });
-
-    moveRightForearm_keys.push({
-        frame: 3 * frameRate,
-        value: new BABYLON.Quaternion.RotationAxis(axis, 0.70).toEulerAngles()
-    });
-
-    moveRightForearm_keys.push({
-        frame: 4 * frameRate,
-        value: new BABYLON.Quaternion.RotationAxis(axis, 1.00).toEulerAngles()
-    });
-
-    moveRightForearm_keys.push({
-        frame: 5 * frameRate,
-        value: new BABYLON.Quaternion.RotationAxis(axis, 0.70).toEulerAngles()
-    });
-
-    moveRightForearm_keys.push({
-        frame: 6 * frameRate,
-        value: new BABYLON.Quaternion.RotationAxis(axis, 0.60).toEulerAngles()
-    });
-
-    moveRightForearm_keys.push({
-        frame: 7 * frameRate,
-        value: new BABYLON.Quaternion.RotationAxis(axis, 0.40).toEulerAngles()
-    });
-    moveRightForearm_keys.push({
-        frame: 8 * frameRate,
-        value: new BABYLON.Quaternion.RotationAxis(axis, 0.00).toEulerAngles()
-    });
-
-
-    var moveLeftForearm = new BABYLON.Animation("moveLeftForearm_keys", "rotation", 5, BABYLON.Animation.ANIMATIONTYPE_VECTOR3, BABYLON.Animation.ANIMATIONLOOPMODE_CYCLE);
-    var moveRightForearm = new BABYLON.Animation("moveRightForearm_keys", "rotation", 5, BABYLON.Animation.ANIMATIONTYPE_VECTOR3, BABYLON.Animation.ANIMATIONLOOPMODE_CYCLE);
-
-    var moveLeftFoot_keys = [];
-    moveLeftFoot_keys.push({
-        frame: 0 * frameRate,
-        value: new BABYLON.Quaternion.RotationAxis(axis, -0.10).toEulerAngles()
-    });
-
-    moveLeftFoot_keys.push({
-        frame: 1 * frameRate,
-        value: new BABYLON.Quaternion.RotationAxis(axis, -0.30).toEulerAngles()
-    });
-
-    moveLeftFoot_keys.push({
-        frame: 2 * frameRate,
-        value: new BABYLON.Quaternion.RotationAxis(axis, -0.20).toEulerAngles()
-    });
-
-    moveLeftFoot_keys.push({
-        frame: 3 * frameRate,
-        value: new BABYLON.Quaternion.RotationAxis(axis, 0.00).toEulerAngles()
-    });
-
-    moveLeftFoot_keys.push({
-        frame: 4 * frameRate,
-        value: new BABYLON.Quaternion.RotationAxis(axis, 0.10).toEulerAngles()
-    });
-
-    moveLeftFoot_keys.push({
-        frame: 5 * frameRate,
-        value: new BABYLON.Quaternion.RotationAxis(axis, 0.40).toEulerAngles()
-    });
-
-    moveLeftFoot_keys.push({
-        frame: 6 * frameRate,
-        value: new BABYLON.Quaternion.RotationAxis(axis, 0.10).toEulerAngles()
-    });
-
-    moveLeftFoot_keys.push({
-        frame: 7 * frameRate,
-        value: new BABYLON.Quaternion.RotationAxis(axis, 0.00).toEulerAngles()
-    });
-    moveLeftFoot_keys.push({
-        frame: 8 * frameRate,
-        value: new BABYLON.Quaternion.RotationAxis(axis, -0.10).toEulerAngles()
-    });
-
-    var moveRightFoot_keys = [];
-    moveRightFoot_keys.push({
-        frame: 0 * frameRate,
-        value: new BABYLON.Quaternion.RotationAxis(axis, 0.40).toEulerAngles()
-    });
-
-    moveRightFoot_keys.push({
-        frame: 1 * frameRate,
-        value: new BABYLON.Quaternion.RotationAxis(axis, 0.10).toEulerAngles()
-    });
-
-    moveRightFoot_keys.push({
-        frame: 2 * frameRate,
-        value: new BABYLON.Quaternion.RotationAxis(axis, 0.00).toEulerAngles()
-    });
-
-    moveRightFoot_keys.push({
-        frame: 3 * frameRate,
-        value: new BABYLON.Quaternion.RotationAxis(axis, -0.10).toEulerAngles()
-    });
-
-    moveRightFoot_keys.push({
-        frame: 4 * frameRate,
-        value: new BABYLON.Quaternion.RotationAxis(axis, -0.30).toEulerAngles()
-    });
-
-    moveRightFoot_keys.push({
-        frame: 5 * frameRate,
-        value: new BABYLON.Quaternion.RotationAxis(axis, -0.20).toEulerAngles()
-    });
-
-    moveRightFoot_keys.push({
-        frame: 6 * frameRate,
-        value: new BABYLON.Quaternion.RotationAxis(axis, 0.00).toEulerAngles()
-    });
-
-    moveRightFoot_keys.push({
-        frame: 7 * frameRate,
-        value: new BABYLON.Quaternion.RotationAxis(axis, 0.10).toEulerAngles()
-    });
-    moveRightFoot_keys.push({
-        frame: 8 * frameRate,
-        value: new BABYLON.Quaternion.RotationAxis(axis, 0.40).toEulerAngles()
-    });
-
-    var moveLeftFoot = new BABYLON.Animation("moveLeftFoot_keys", "rotation", 5, BABYLON.Animation.ANIMATIONTYPE_VECTOR3, BABYLON.Animation.ANIMATIONLOOPMODE_CYCLE);
-    var moveRightFoot = new BABYLON.Animation("moveRightFoot_keys", "rotation", 5, BABYLON.Animation.ANIMATIONTYPE_VECTOR3, BABYLON.Animation.ANIMATIONLOOPMODE_CYCLE);
-
-
-
-
-
-    console.log(new BABYLON.Quaternion.RotationAxis(axis, Math.PI/2).toEulerAngles());
-    movein.setKeys(moveRightLeg_keys);
-    moveLeftLeg.setKeys(moveLeftLeg_keys);
-    moveLeftLegDown.setKeys(moveLeftLegDown_keys);
-    moveRightLegDown.setKeys(moveRightLegDown_keys);
-    moveLeftArm.setKeys(moveLeftArm_keys);
-    moveRightArm.setKeys(moveRightArm_keys);
-    moveLeftForearm.setKeys(moveLeftForearm_keys);
-    moveRightForearm.setKeys(moveRightForearm_keys);
-    moveLeftFoot.setKeys(moveLeftFoot_keys);
-    moveRightFoot.setKeys(moveRightFoot_keys);
-
-    var animationGroupWalk = new BABYLON.AnimationGroup("Walk");
-
-    animationGroupWalk.addTargetedAnimation(movein, character.rt_upperleg);
-    animationGroupWalk.addTargetedAnimation(moveLeftLeg, character.lt_upperleg);
-    animationGroupWalk.addTargetedAnimation(moveLeftLegDown, character.lt_downleg);
-    animationGroupWalk.addTargetedAnimation(moveRightLegDown, character.rt_downleg);
-    animationGroupWalk.addTargetedAnimation(moveLeftArm, character.lt_arm);
-    animationGroupWalk.addTargetedAnimation(moveRightArm, character.rt_arm);
-    animationGroupWalk.addTargetedAnimation(moveLeftForearm, character.lt_forearm);
-    animationGroupWalk.addTargetedAnimation(moveRightForearm, character.rt_forearm);
-    animationGroupWalk.addTargetedAnimation(moveLeftFoot, character.lt_foot);
-    animationGroupWalk.addTargetedAnimation(moveRightFoot, character.rt_foot);
-    animationGroupWalk.play(true);
-}
