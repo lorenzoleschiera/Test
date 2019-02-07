@@ -1,0 +1,38 @@
+﻿html, body {
+    overflow: hidden;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+#renderCanvas {
+    width: 100%;
+    height: 100%;
+    touch-action: none;
+}
+
+#custom-handle {
+    width: 3em;
+    height: 1.6em;
+    top: 50%;
+    margin-top: -.8em;
+    text-align: center;
+    line-height: 1.6em;
+}
+/** {
+            cursor: none;
+        }*/
+.selected {
+    background-color: goldenrod !important;
+}
+a {
+    color: black;
+}
+
+a:visited{
+    color:black;
+}
+.no-close .ui-dialog-titlebar-close {
+    display: none;
+}

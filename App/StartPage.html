@@ -1,0 +1,101 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title></title>
+
+    <script src="../scripts/jquery-ui-1.12.1.custom/external/jquery/jquery.js"></script>
+    <script src="../scripts/jquery-ui-1.12.1.custom/jquery-ui.min.js"></script>
+    <link href="../scripts/jquery-ui-1.12.1.custom/jquery-ui.min.css" rel="stylesheet" />
+    <link href="../scripts/jquery-ui-1.12.1.custom/jquery-ui.structure.min.css" rel="stylesheet" />
+    <link href="../scripts/jquery-ui-1.12.1.custom/jquery-ui.theme.min.css" rel="stylesheet" />
+    <link href="../style/settings.css" rel="stylesheet" />
+    <style>
+        body {
+            font-family: Papyrus,fantasy !important;
+            background-size: cover; /* Resize the background image to cover the entire container */
+            background-image: url('../textures/city.png');
+        }
+
+        h1 {
+            font-size: 50px;
+            color: darkgoldenrod;
+        }
+
+        #menu button {
+            margin: 20px;
+        }
+    </style>
+    <script>
+        function Play() {
+            window.location.href = "Index.html";
+        }
+        function Instruction() {
+            $("#instruction").dialog({
+                width: 728
+            });
+            $("#credits").dialog("close");
+        }
+        function Credits() {
+            $("#credits").dialog({
+                width: 512
+            });
+            $("#instruction").dialog("close");
+        }
+    </script>
+</head>
+<body>
+    <div style="margin:200px 130px">
+        <h1>Jenzo Game</h1>
+        <div id="menu" style="margin-left:50px">
+            <button id="btnStart" style="width:150px" onclick="Play()" class="ui-button ui-widget ui-corner-all">Start</button>
+            <br />
+            <button id="btnInstruction" style="width:150px" onclick="Instruction()" class="ui-button ui-widget ui-corner-all">Instruction</button>
+            <br />
+            <button id="btnCredits" style="width:150px" onclick="Credits()" class="ui-button ui-widget ui-corner-all">Credits</button>
+
+        </div>
+    </div>
+    <div id="instruction" title="Instruction" style="padding:20px">
+        <div style="text-align:center;font-size:25px"><b>Are you ready for this adventure?</b></div> <br />
+        <p>
+            You can "Start" a new game from this main menu. <br />
+            At the "Start" clicking, you are called to set the number of characters to shoot and then you can start the game clicking on "Play!" button. <br />
+            As soon as the game page is loaded, you are on the rooftop.<br /> From your overview, you can change the direction pointed by the viewfinder by simply move the mouse.
+            After that you have selected a victim and you have positioned the viewfinder, you can shoot with left click. The bullet is fired. <br />
+            <b>I hope that you have a good eyesight!</b><br />
+            At the moment in which the bullet is fired, the time go slowly so you can follow the bullet's trajectory and see if you are hit the target.<br />
+            If you have been precise, the hitted body part of the target will turn red.<br />
+        </p>
+        <p>
+            According to the hitted body part, points are awarded to you .
+            You earn <mark style="color:red;background: none;">2000</mark> points for head, <mark style="color:red;background: none;">
+                1000
+            </mark> for body, <mark style="color:red;background: none;">
+                400
+            </mark> for each part of the limbs and <mark style="color:red;background: none;">
+                200
+            </mark> for hands or feet. <br />
+            You win when all victims are died. <br />
+            For every bullet that you don't fired, you earn <mark style="color:red;background: none;">1000</mark>  points more.<br />
+    When your weapon is empty or you kill everybody, the game is ends and you can restart a new game. <br />
+
+</p>
+        <div style="margin-top:20px; color:grey;font-size:15px">
+            If you prefer to set a different game parameters you can click on the gear icon from the main screen of the game and set a daytime, the gravity value or the placement on which you will positioned to shoot yours enemys.<br />
+            Finally, is also possible to set the default values, to cancel the changes made or to save them.<br />
+            Always from the main screen of the game you can click on the home icon to return on the main menu.
+        </div>
+    </div>
+    <div id="credits" style="text-align:center" title="Credits">
+        <div style="padding:20px">
+            <h2> Jenzo Game </h2>
+            <h3>Interactive Graphics Project</h3>
+            <br /> Deployed by Leschiera Lorenzo & Lucia Jessica.
+            <br /> Teacher: Marco Schaerf
+            <br /> a.y. 2018-2019
+        </div>
+    </div>
+
+</body>
+</html>
