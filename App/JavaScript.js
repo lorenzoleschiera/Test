@@ -260,7 +260,7 @@ function render() {
         var skyboxMaterial = new BABYLON.StandardMaterial("skyBox", scene);
         var texture = getDaytimeTexture();
         skyboxMaterial.backFaceCulling = false;
-        skyboxMaterial.reflectionTexture = new BABYLON.CubeTexture("/textures/" + texture + "/skyrender", scene);
+        skyboxMaterial.reflectionTexture = new BABYLON.CubeTexture("../textures/" + texture + "/skyrender", scene);
         skyboxMaterial.reflectionTexture.coordinatesMode = BABYLON.Texture.SKYBOX_MODE;
         skyboxMaterial.diffuseColor = new BABYLON.Color3(0, 0, 0);
         skyboxMaterial.specularColor = new BABYLON.Color3(0, 0, 0);
